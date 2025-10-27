@@ -1,0 +1,53 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split,cross_val_score
+from sklearn.metrics import accuracy_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+from scipy.stats import mode
+pd.set_option('display.max_columns',500)
+pd.set_option('display.max_info_columns',500)
+df=pd.read_csv('Training.csv').dropna(axis=1)
+df.info()
+disease_counts=df['prognosis'].value_counts()
+temp_df=pd.DataFrame({
+    "disease":disease_counts.index,
+    "count":disease_counts.values
+})
+plt.figure()
+sns.barplot(x='disease',y='count',data=temp_df)
+plt.xticks(rotation=90)
+plt.title('data labels balanced or not')
+plt.show()
+
+cormat=df.corr()
+fig=plt.figure(figsize=(50,50))
+sns.heatmap(cormat,square=True,yticklabels=df.columns)
+plt.show()
+
+encoder=LabelEncoder()
+df['prognosis']=encoder.fit_transform(df['prognosis'])
+ 
+X=df.iloc[:,:-1]
+y=df.iloc[:,-1]
+
+x_train,x_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=42)
+
+rfc=RandomForestClassifier()
+svc=SVC()
+nb=GaussianNB()
+histrf=rfc.fit(X,y)
+histsvc=svc.fit(X,y)
+histnb=nb.fit(X,y)
+def final_prediction(x):
+  return mode([svc.predict(x)[0],rfc.predict(x)[0],nb.predict(x)[0]])
+
+
+
+
+
+
